@@ -15,5 +15,5 @@ Small toy project to execute or compile Brainfuck programs:
 ### Installation
 
 ```
-ghc Main.hs
+ghc -o bin/bf -isrc/ src/Main.hs
 ```

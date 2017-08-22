@@ -16,5 +16,5 @@ if [ ! -f "$1" ]; then
   exit 1
 fi
 
-$(dirname $0)/../Main evaluate < $1
+$(dirname $0)/bf evaluate < $1
 exit $?

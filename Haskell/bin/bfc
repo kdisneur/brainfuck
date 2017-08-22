@@ -22,7 +22,7 @@ fi
 input_filename=$(basename ${inputfile})
 outputfile=${input_filename%.*}
 transpiled_file=$(mktemp /tmp/${outputfile}.XXXXXXXXX.c)
-$(dirname $0)/../Main -l $language transpile < $inputfile > $transpiled_file
+$(dirname $0)/bf -l $language transpile < $inputfile > $transpiled_file
 status=$?
 if [ 0 -eq ${status} ]; then
   gcc -o ${outputfile} ${transpiled_file}
