@@ -10,7 +10,7 @@ doTranspile IncrementValue = insert "++*ptr;"
 doTranspile NextPointer = insert "++ptr;"
 doTranspile PreviousPointer = insert "--ptr;"
 doTranspile SetValue = insert "*ptr=getchar();"
-doTranspile (While instructions) = insert $ ("while(*ptr){" ++ generate instructions ++ "}")
+doTranspile (While instructions) = insert ("while(*ptr){" ++ generate instructions ++ "}")
 
 generate :: [Instruction] -> String
 generate = intercalate "\n" . foldr (doTranspile) []

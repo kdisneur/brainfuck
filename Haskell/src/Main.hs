@@ -40,4 +40,3 @@ logError message = do
   hPutStrLn stderr message
   exitWith (ExitFailure 1)
   return ()
-
