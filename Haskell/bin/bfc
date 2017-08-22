@@ -1,0 +1,34 @@
+#! /bin/bash
+
+error_echo (){
+  echo $* >&2
+}
+
+if [ "$#" -ne 2 ]; then
+  error_echo "2 parameters are required."
+  error_echo
+  error_echo "Usage: $(dirname $0)/$(basename $0) <language> <file>"
+  exit 1
+fi
+
+language="$1"
+inputfile="$2"
+
+if [ ! -f ${inputfile} ]; then
+  error_echo "Source file ${inputfile} does not exist."
+  exit 1
+fi
+
+input_filename=$(basename ${inputfile})
+outputfile=${input_filename%.*}
+transpiled_file=$(mktemp /tmp/${outputfile}.XXXXXXXXX.c)
+$(dirname $0)/../Main -l $language transpile < $inputfile > $transpiled_file
+status=$?
+if [ 0 -eq ${status} ]; then
+  gcc -o ${outputfile} ${transpiled_file}
+  chmod u+x ${outputfile}
+else
+  exit ${status}
+fi
+
+rm ${transpiled_file}

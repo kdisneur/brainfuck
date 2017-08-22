@@ -1,0 +1,20 @@
+#! /bin/bash
+
+error_echo (){
+  echo $* >&2
+}
+
+if [ "$#" -ne 1 ]; then
+  error_echo "1 parameter is required."
+  error_echo
+  error_echo "Usage: $(dirname $0)/$(basename $0) <file>"
+  exit 1
+fi
+
+if [ ! -f "$1" ]; then
+  error_echo "Source file $1 does not exist."
+  exit 1
+fi
+
+$(dirname $0)/../Main evaluate < $1
+exit $?
