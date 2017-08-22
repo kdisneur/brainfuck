@@ -5,7 +5,6 @@ import Data.List (intercalate)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 
-type Error = String
 type Pointer = Int
 type Index = Int
 type Source = String
@@ -54,30 +53,25 @@ new = Cursor 0 Map.empty
 while :: (Cursor -> IO Cursor) -> Cursor -> IO Cursor
 while f cursor = if 0 == (get cursor) then return cursor else (f cursor) >>= while f
 
-errorMessage :: Char -> Index -> String
-errorMessage c i = intercalate " " ["Instruction", [c], "at index", show i, "is invalid"]
-
-parse :: Source -> Either Error [Instruction]
-parse content = sequence instructions
+parse :: Source -> [Instruction]
+parse content = instructions
   where (_, instructions) = doCompile content (0, [])
 
-doCompile :: Source -> (Index, [Either Error Instruction]) -> (Index, [Either Error Instruction])
+doCompile :: Source -> (Index, [Instruction]) -> (Index, [Instruction])
 doCompile content (i, instructions) =
   if i < length content
      then
      case content !! i of
-       '>' -> doCompile content ((i + 1), (Right NextPointer):instructions)
-       '<' -> doCompile content ((i + 1), (Right PreviousPointer):instructions)
-       '+' -> doCompile content ((i + 1), (Right IncrementValue):instructions)
-       '-' -> doCompile content ((i + 1), (Right DecrementValue):instructions)
-       '.' -> doCompile content ((i + 1), (Right GetValue):instructions)
-       ',' -> doCompile content ((i + 1), (Right SetValue):instructions)
+       '>' -> doCompile content ((i + 1), NextPointer:instructions)
+       '<' -> doCompile content ((i + 1), PreviousPointer:instructions)
+       '+' -> doCompile content ((i + 1), IncrementValue:instructions)
+       '-' -> doCompile content ((i + 1), DecrementValue:instructions)
+       '.' -> doCompile content ((i + 1), GetValue:instructions)
+       ',' -> doCompile content ((i + 1), SetValue:instructions)
        '[' ->
           let (i', instructions') = doCompile content ((i + 1), [])
-            in case sequence instructions' of
-                 Right instructions'' -> doCompile content (i', (Right (While instructions'')):instructions)
-                 Left error -> ((i + 1), ((Left error):instructions))
+           in doCompile content (i', (While instructions'):instructions)
        ']' -> ((i + 1), reverse instructions)
-       c   -> (i, ((Left (errorMessage c i)):instructions))
+       c   -> doCompile content ((i + 1), instructions)
      else (i, reverse instructions)
 

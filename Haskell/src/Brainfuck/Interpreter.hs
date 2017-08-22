@@ -29,8 +29,8 @@ doRunWith (While instructions) cursor = while f cursor
   where fs = map doRunWith instructions
         f  = foldl (>=>) return fs
 
-evaluate :: String -> Either String (IO ())
-evaluate content = (fmap doEvaluate . parse) content
+evaluate :: String -> IO ()
+evaluate content = (doEvaluate . parse) content
 
 doEvaluate :: [Instruction] -> IO ()
 doEvaluate instructions =

@@ -26,8 +26,8 @@ cleanContent :: String -> String
 cleanContent = filter ((/=) '\n')
 
 executeAction :: Maybe Action -> String -> IO ()
-executeAction (Just Evaluate) content = either logError id $ evaluate content
-executeAction (Just (Transpile language)) content = either logError putStrLn (transpile language content)
+executeAction (Just Evaluate) content = evaluate content
+executeAction (Just (Transpile language)) content = putStrLn (transpile language content)
 executeAction Nothing content = logError "Command doesn't exist.\n\
                                          \\n\
                                          \Usage: brainfuck evaluate <<< file.bf # Execute\n\

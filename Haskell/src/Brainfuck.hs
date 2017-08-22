@@ -4,12 +4,11 @@ import qualified Brainfuck.Parser as Parser
 import qualified Brainfuck.Interpreter as Interpreter
 import qualified Brainfuck.Transpiler.C as Transpiler.C
 
-type Error = String
 data Language
   = C
 
-evaluate :: String -> Either Error (IO ())
+evaluate :: String -> IO ()
 evaluate = Interpreter.evaluate
 
-transpile :: Language -> String -> Either Error String
-transpile C = (fmap Transpiler.C.transpile) . Parser.parse
+transpile :: Language -> String -> String
+transpile C = Transpiler.C.transpile . Parser.parse
