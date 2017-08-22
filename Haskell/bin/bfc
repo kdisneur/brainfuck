@@ -21,14 +21,18 @@ fi
 
 input_filename=$(basename ${inputfile})
 outputfile=${input_filename%.*}
-transpiled_file=$(mktemp /tmp/${outputfile}.XXXXXXXXX.c)
+transpiled_file=$(mktemp /tmp/${outputfile}.XXXXXXXXX)
+mv ${transpiled_file} ${transpiled_file}.c
+transpiled_file=${transpiled_file}.c
+
 $(dirname $0)/bf -l $language transpile < $inputfile > $transpiled_file
+
 status=$?
 if [ 0 -eq ${status} ]; then
   gcc -o ${outputfile} ${transpiled_file}
   chmod u+x ${outputfile}
+  rm ${transpiled_file}
 else
+  rm ${transpiled_file}
   exit ${status}
 fi
-
-rm ${transpiled_file}
