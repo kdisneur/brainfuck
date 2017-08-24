@@ -22,7 +22,8 @@ header = [ "#include<stdio.h>"
          , "char *ptr=array;"]
 
 footer :: [String]
-footer = [ "return 0;"
+footer = [ "putchar('\\n');"
+         , "return 0;"
          , "}"]
 
 insert :: String -> [String] -> [String]

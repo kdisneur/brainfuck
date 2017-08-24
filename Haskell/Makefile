@@ -1,4 +1,5 @@
-CC=ghc
+C=ghc
+I=ghci
 OUTPUT_DIR=bin
 SOURCE_DIR=src
 
@@ -9,4 +10,7 @@ clean:
 	ls -F | grep '*' | sed -E 's/.?$$//' | xargs rm
 
 compile:
-	$(CC) -o ${OUTPUT_DIR}/bf -i$(SOURCE_DIR) $(SOURCE_DIR)/Main.hs
+	$(C) -o ${OUTPUT_DIR}/bf -i$(SOURCE_DIR) $(SOURCE_DIR)/Main.hs
+
+console:
+	$(I) -i$(SOURCE_DIR) $(SOURCE_DIR)/Main.hs

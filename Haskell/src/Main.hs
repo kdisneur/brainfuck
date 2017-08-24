@@ -12,15 +12,16 @@ data Action
 
 main :: IO ()
 main = do
-  action <- fmap chooseAction getArgs
-  content <- fmap cleanContent getContents
+  (action, file) <- fmap chooseAction getArgs
+  content <- readFile file
   executeAction action content
-  return ()
+  putStrLn ""
 
-chooseAction :: [String] -> Maybe Action
-chooseAction ("evaluate" : others) = Just Evaluate
-chooseAction ("-l" : "C" : "transpile" : others) = Just (Transpile C)
-chooseAction others = Nothing
+chooseAction :: [String] -> (Maybe Action, String)
+chooseAction ("evaluate" : file : others) = (Just Evaluate, file)
+chooseAction ("-l" : "c" : "transpile" : file : others) = (Just (Transpile C), file)
+chooseAction ("-l" : "js" : "transpile" : file : others) = (Just (Transpile JS), file)
+chooseAction others = (Nothing, "")
 
 cleanContent :: String -> String
 cleanContent = filter ((/=) '\n')
@@ -30,10 +31,10 @@ executeAction (Just Evaluate) content = evaluate content
 executeAction (Just (Transpile language)) content = putStrLn (transpile language content)
 executeAction Nothing content = logError "Command doesn't exist.\n\
                                          \\n\
-                                         \Usage: brainfuck evaluate <<< file.bf # Execute\n\
-                                         \       brainfuck -l C transpile <<< file.bf # Transpile to C\n\
+                                         \Usage: brainfuck evaluate file.bf # Execute\n\
+                                         \       brainfuck -l c transpile file.bf # Transpile to C\n\
                                          \\n\
-                                         \Available languages: C"
+                                         \Available languages: c, js"
 
 logError :: String -> IO ()
 logError message = do

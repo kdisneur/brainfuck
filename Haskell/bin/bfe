@@ -5,6 +5,8 @@ error_echo (){
 }
 
 if [ "$#" -ne 1 ]; then
+  error_echo "bfe: Brainfuck interpreter"
+  error_echo
   error_echo "1 parameter is required."
   error_echo
   error_echo "Usage: $(dirname $0)/$(basename $0) <file>"
@@ -16,5 +18,5 @@ if [ ! -f "$1" ]; then
   exit 1
 fi
 
-$(dirname $0)/bf evaluate < $1
+$(dirname $0)/bf evaluate $1
 exit $?

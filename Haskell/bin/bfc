@@ -5,34 +5,48 @@ error_echo (){
 }
 
 if [ "$#" -ne 2 ]; then
+  error_echo "Brainfuck Compiler"
+  error_echo
   error_echo "2 parameters are required."
   error_echo
   error_echo "Usage: $(dirname $0)/$(basename $0) <language> <file>"
+  error_echo
+  error_echo "Available languages: c, js"
   exit 1
 fi
 
 language="$1"
 inputfile="$2"
+input_filename=$(basename ${inputfile})
+outputfile=${input_filename%.*}
 
 if [ ! -f ${inputfile} ]; then
   error_echo "Source file ${inputfile} does not exist."
   exit 1
 fi
 
-input_filename=$(basename ${inputfile})
-outputfile=${input_filename%.*}
-transpiled_file=$(mktemp /tmp/${outputfile}.XXXXXXXXX)
-mv ${transpiled_file} ${transpiled_file}.c
-transpiled_file=${transpiled_file}.c
+if [ $language = 'c' ]; then
+  transpiled_file=$(mktemp /tmp/${outputfile}.XXXXXXXXX)
+  mv ${transpiled_file} ${transpiled_file}.c
+  transpiled_file=${transpiled_file}.c
 
-$(dirname $0)/bf -l $language transpile < $inputfile > $transpiled_file
+  $(dirname $0)/bf -l $language transpile $inputfile > $transpiled_file
 
-status=$?
-if [ 0 -eq ${status} ]; then
-  gcc -o ${outputfile} ${transpiled_file}
-  chmod u+x ${outputfile}
-  rm ${transpiled_file}
+  status=$?
+  if [ 0 -eq ${status} ]; then
+    gcc -o ${outputfile} ${transpiled_file}
+    chmod u+x ${outputfile}
+    rm ${transpiled_file}
+  else
+    rm ${transpiled_file}
+    exit ${status}
+  fi
 else
-  rm ${transpiled_file}
+  $(dirname $0)/bf -l $language transpile $inputfile > $outputfile
+  status=$?
+
+  chmod u+x ${outputfile}
+
   exit ${status}
 fi
+
