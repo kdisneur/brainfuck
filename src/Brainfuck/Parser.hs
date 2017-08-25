@@ -1,14 +1,14 @@
 module Brainfuck.Parser (Cursor, Instruction(..), decrementValue, incrementValue, getValue, new, nextPointer, parse, previousPointer, setValue, while) where
 
+import Brainfuck.Zipper (currentCursor, empty, farLeft, farRight, insert, left, right, update, Zipper)
 import Data.Char (chr, ord)
 import Data.List (intercalate)
-import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 
 type Pointer = Int
 type Index = Int
 type Source = String
-data Cursor = Cursor Pointer (Map.Map Pointer Int) deriving Show
+type Cursor = Zipper Int
 data Instruction
   = DecrementValue
   | GetValue
@@ -19,39 +19,41 @@ data Instruction
   | While [Instruction]
   deriving Show
 
-onPointer :: (Pointer -> Pointer) -> Cursor -> Cursor
-onPointer f (Cursor x ys) = Cursor (f x) ys
-
-onValue :: (Int -> Int) -> Cursor -> Cursor
-onValue f original@(Cursor x ys) = Cursor x (Map.insert x y' ys)
-  where y' = (f . get) original
+defaultValue :: Int
+defaultValue = 0
 
 get :: Cursor -> Int
-get (Cursor x ys) = (fromMaybe 0 . Map.lookup x) ys
+get = (fromMaybe defaultValue) . currentCursor
 
 getValue :: Cursor -> Char
 getValue = chr . get
 
 setValue :: Char -> Cursor -> Cursor
-setValue v = onValue (\x -> ord v)
+setValue v = update (ord v)
 
 decrementValue :: Cursor -> Cursor
-decrementValue = onValue (flip (-) 1)
+decrementValue c = update x c
+  where x = (get c) - 1
 
 incrementValue :: Cursor -> Cursor
-incrementValue = onValue ((+) 1)
+incrementValue c = update x c
+  where x = (get c) + 1
 
 nextPointer :: Cursor -> Cursor
-nextPointer = onPointer ((+) 1)
+nextPointer c = if farRight c
+                   then insert defaultValue c
+                   else right c
 
 previousPointer :: Cursor -> Cursor
-previousPointer = onPointer (flip (-) 1)
+previousPointer c = if farLeft c
+                       then insert defaultValue c
+                       else left c
 
 new :: Cursor
-new = Cursor 0 Map.empty
+new = insert defaultValue empty
 
 while :: (Cursor -> IO Cursor) -> Cursor -> IO Cursor
-while f cursor = if 0 == (get cursor) then return cursor else (f cursor) >>= while f
+while f c = if 0 == (get c) then return c else (f c) >>= while f
 
 parse :: Source -> [Instruction]
 parse content = instructions
@@ -74,4 +76,3 @@ doCompile content (i, instructions) =
        ']' -> ((i + 1), reverse instructions)
        c   -> doCompile content ((i + 1), instructions)
      else (i, reverse instructions)
-
